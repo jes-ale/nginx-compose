@@ -1,0 +1,34 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/letsencrypt:ro
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./nginx/templates/:/etc/nginx/templates/:ro
+      - ./nginx/99-autoreload.sh:/docker-entrypoint.d/99-autoreload.sh
+    networks:
+      - nginx_net
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot 
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    networks:
+      - nginx_net
+    restart: unless-stopped
+
+volumes:
+  shared_confs:
+    name: shared_confs
+
+networks:
+  nginx_net:
+    name: nginx_net
+    driver: bridge
+
